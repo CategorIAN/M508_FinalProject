@@ -1,12 +1,19 @@
-from CompleteGraph import CompleteGraph
-from EuclideanGraph import EuclideanGraph
-import numpy as np
+from RandomEuclideanGraph import RandomEuclideanGraph
+from TSP import TSP
 
-
+def f(i):
+    if i == 1:
+        G = RandomEuclideanGraph()
+        print(G.points)
+        walk = G.randomHamCycle()
+        print(walk)
+        print(G.walkDistance(walk))
+    if i == 2:
+        G = RandomEuclideanGraph(xlim=(0,0))
+        print(G.points)
+        tsp = TSP(G)
+        print(tsp.c([0, 1]))
 
 if __name__ == '__main__':
-    #G = CompleteGraph(np.array([[1, 2, 2], [4, 5, 6], [7, 8, 9]]))
-    G = EuclideanGraph([(1, 2), (3, 4), (5, 6)])
-    walk = G.randomHamCycle()
-    print(walk)
-    print(G.walkDistance(walk))
+    f(2)
+

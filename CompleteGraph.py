@@ -1,6 +1,7 @@
 from itertools import product
 import numpy as np
 from functools import reduce
+import random
 class CompleteGraph:
     def __init__(self, dist_matrix):
         m, n = dist_matrix.shape
@@ -11,9 +12,11 @@ class CompleteGraph:
         self.edges = list(product(range(self.n)))
         self.dist_matrix = dist_matrix
 
+    def closeWalk(self, w):
+        return w + [w[0]]
+
     def randomHamCycle(self):
-        w = np.random.permutation(self.n)
-        return np.concatenate((w, [w[0]]))
+        return self.closeWalk(random.sample(range(self.n), k = self.n))
 
     def walkDistance(self, walk):
         def recurse(distance, current_v, toWalk):
