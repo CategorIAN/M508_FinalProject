@@ -11,6 +11,7 @@ class CompleteGraph:
         self.vertices = list(range(self.n))
         self.edges = list(product(range(self.n)))
         self.dist_matrix = dist_matrix
+        self.neighbors = dict([(i, set(self.filter(self.vertices, lambda j: j != i))) for i in self.vertices])
 
     def closeWalk(self, w):
         return w + [w[0]]
@@ -26,3 +27,6 @@ class CompleteGraph:
                 next_v, remaining = toWalk[0], toWalk[1:]
                 return recurse(distance + self.dist_matrix[(current_v, next_v)], next_v, remaining)
         return 0 if len(walk) == 0 else recurse(0, walk[0], walk[1:])
+
+    def filter(self, s, predicate):
+        return reduce(lambda v, i: v + [i] if predicate(i) else v, s, [])
