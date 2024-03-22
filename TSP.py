@@ -19,6 +19,8 @@ class TSP:
     def F(self, x, mu, theta_1, theta_2, theta_3, theta_4):
         def f(v):
             r1 = theta_1 * x[v]
-            r2 = theta_2 @ mu @ np.vectorize(lambda i: int(i != v))(self.G.vertices)
-            #r3 = theta_3 np.
+            neighbor_v = np.vectorize(lambda i: int(i != v))(self.G.vertices)
+            r2 = theta_2 @ mu @ neighbor_v
+            r3 = theta_3 @ self.relu(np.outer(theta_4, self.G.dist_matrix[v, :])) @ neighbor_v
+            return self.relu(r1 + r2 + r3)
         return f
