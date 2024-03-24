@@ -20,7 +20,11 @@ def f(i):
         theta_2 = np.random.rand(p, p)
         theta_3 = np.random.rand(p, p)
         theta_4 = np.random.rand(p, 1)
-        print(tsp.struc2vec(x, theta_1, theta_2, theta_3, theta_4, 4))
+        theta_5 = np.random.rand(2 * p, 1)
+        theta_6 = np.random.rand(p, p)
+        theta_7 = np.random.rand(p, p)
+        mu = tsp.struc2vec(x, theta_1, theta_2, theta_3, theta_4, 4)
+        print(tsp.Q(mu, theta_5, theta_6, theta_7)(0))
 if __name__ == '__main__':
     f(2)
 

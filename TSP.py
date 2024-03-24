@@ -30,10 +30,13 @@ class TSP:
 
     def struc2vec(self, x, theta_1, theta_2, theta_3, theta_4, T):
         F_func = self.F(x, theta_1, theta_2, theta_3, theta_4)
-        def go(mu, t):
-            if t == T:
-                return mu
-            else:
-                return go(F_func(mu), t + 1)
+        go = lambda mu, t: mu if t == T else go(F_func(mu), t + 1)
         return go(np.zeros((self.p, self.G.n)), 0)
+
+    def Q(self, mu, theta_5, theta_6, theta_7):
+        def f(v):
+            r1 = theta_6 @ mu @ np.ones(self.G.n)
+            r2 = theta_7 @ mu[:, v]
+            return theta_5.reshape(-1, 1) @ self.relu(np.concatenate([r1, r2], axis=0))
+        return f
 
