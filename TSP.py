@@ -1,15 +1,20 @@
 import numpy as np
+from functools import reduce
 
 class TSP:
-    def __init__(self, G, p):
+    def __init__(self, G, p, T):
         self.G = G
         self.p = p
+        self.T = T
 
     def h(self, S):
         return S
 
     def c(self, H):
-        return self.G.walkDistance(self.G.closeWalk(H))
+        return - self.G.walkDistance(self.G.closeWalk(H))
+
+    def x(self, S):
+        return np.vectorize(lambda i: int(i in S))(self.G.vertices)
 
     def mu_initial(self, p):
         return np.zeros((p, self.G.n))
@@ -35,8 +40,20 @@ class TSP:
 
     def Q(self, mu, theta_5, theta_6, theta_7):
         def f(v):
-            r1 = theta_6 @ mu @ np.ones(self.G.n)
-            r2 = theta_7 @ mu[:, v]
-            return theta_5.reshape(-1, 1) @ self.relu(np.concatenate([r1, r2], axis=0))
+            r1 = theta_6 @ mu @ np.ones((self.G.n, 1))
+            r2 = theta_7 @ mu[:, [v]]
+            return (theta_5.reshape(1, -1) @ self.relu(np.concatenate([r1, r2], axis=0)))[0,0]
+        return f
+
+    def r(self, S, v):
+        return self.c(S+[v]) - self.c(S)
+
+    def policy(self, theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, theta_7):
+        def f(S):
+            x = self.x(S)
+            mu = self.struc2vec(x, theta_1, theta_2, theta_3, theta_4, self.T)
+            Q = self.Q(mu, theta_5, theta_6, theta_7)
+            vQs = [(v, Q(v)) for v in set(self.G.vertices).difference(S)]
+            return reduce(lambda t1, t2: t2 if t1[0] is None or t2[1] > t1[1] else t1, vQs, (None, None))[0]
         return f
 

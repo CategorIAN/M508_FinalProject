@@ -14,7 +14,7 @@ class CompleteGraph:
         self.neighbors = dict([(i, set(self.filter(self.vertices, lambda j: j != i))) for i in self.vertices])
 
     def closeWalk(self, w):
-        return w + [w[0]]
+        return w + [w[0]] if len(w) > 0 and w[-1] != w[0] else w
 
     def randomHamCycle(self):
         return self.closeWalk(random.sample(range(self.n), k = self.n))
