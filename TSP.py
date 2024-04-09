@@ -3,9 +3,11 @@ from functools import reduce
 from Theta import Theta
 
 class TSP:
-    def __init__(self, G, T):
+    def __init__(self, G, T, eps, n):
         self.G = G
         self.T = T
+        self.eps = eps
+        self.n = n
 
     def c(self, S):
         return - self.G.walkDistance(self.G.closeWalk(S))
@@ -47,10 +49,28 @@ class TSP:
             return (Theta.theta_5.reshape(1, -1) @ self.relu(np.concatenate([r1, r2], axis=0)))[0,0]
         return f
 
+    def S_not(self, S):
+        return set(self.G.vertices).difference(S)
+
     def policy(self, Theta):
-        def f(S):
+        def f(S, S_not = None):
+            S_not = self.S_not(S) if S_not is None else S_not
             Q = self.Q(Theta, S)
-            vQs = [(v, Q(v)) for v in set(self.G.vertices).difference(S)]
+            vQs = [(v, Q(v)) for v in S_not]
             return reduce(lambda t1, t2: t2 if t1[0] is None or t2[1] > t1[1] else t1, vQs, (None, None))[0]
         return f
+"""
+    def R(self, S):
+        def f(S, )
+
+    def QLearning(self, M, Theta, S):
+        S_not = self.S_not(S)
+        v = np.random.choice(S_not) if np.random.rand() < self.eps else self.policy(Theta)(S, S_not)
+        S_new = S + [v]
+        t = len(S)
+        if t >= self.n:
+            M_new = M + [(S[:(t-self.n)], S[t-self.n], )]
+"""
+
+
 
