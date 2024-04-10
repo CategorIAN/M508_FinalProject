@@ -1,6 +1,7 @@
 import numpy as np
 from functools import reduce
 from Theta import Theta
+import random
 
 class TSP:
     def __init__(self, G, T, eps, n):
@@ -59,18 +60,45 @@ class TSP:
             vQs = [(v, Q(v)) for v in S_not]
             return reduce(lambda t1, t2: t2 if t1[0] is None or t2[1] > t1[1] else t1, vQs, (None, None))[0]
         return f
-"""
-    def R(self, S):
-        def f(S, )
 
-    def QLearning(self, M, Theta, S):
-        S_not = self.S_not(S)
-        v = np.random.choice(S_not) if np.random.rand() < self.eps else self.policy(Theta)(S, S_not)
-        S_new = S + [v]
+    def updated_S(self, Theta):
+        def f(S):
+            S_not = self.S_not(S)
+            v = np.random.choice(S_not) if np.random.rand() < self.eps else self.policy(Theta)(S, S_not)
+            return S + [v]
+        return f
+
+    def updated_C(self, S):
+        w = self.G.dist_matrix
+        def f(C):
+            t = len(C)
+            c = C[-1] + w[(S[t-1], S[0])] - w[(S[t-1], S[t])] - w[(S[t], S[0])]
+            return C + [c]
+        return f
+
+    def R(self, C, t, n):
+        return C[t + n - 1] - C[t - 1]
+
+    def updated_M(self, S, C):
         t = len(S)
-        if t >= self.n:
-            M_new = M + [(S[:(t-self.n)], S[t-self.n], )]
-"""
+        def f(M):
+            return M + [(S[:(t-self.n)], S[t-self.n], self.R(C, t-self.n, self.n), S)] if t >= self.n else M
+        return f
+
+    def B(self, m, M):
+        return random.sample(M, m)
+
+    def updated_Theta(self, predicate, M):
+        def f(Theta):
+            if predicate:
+                B = self.B(1, M)[0]
+
+    def QLearning(self, M, Theta, S, C):
+        S_new = self.updated_S(Theta)(S)
+        C_new = self.updated_C(S_new)(C)
+        M_new = self.updated_M(S, C)(M)
+
+
 
 
 
