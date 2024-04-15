@@ -11,6 +11,7 @@ class Theta:
         self.theta_5b = theta_5b
         self.theta_6 = theta_6
         self.theta_7 = theta_7
+        self.thetas = [theta_1, theta_2, theta_3, theta_4, theta_5a, theta_5b, theta_6, theta_7]
 
 class RandomTheta (Theta):
     def __init__(self, p):
