@@ -135,11 +135,26 @@ class TSP:
         if v is None:
             return 0
         else:
-            r1 = Theta.theta_6 @ mu_list[self.T] @ np.ones((self.m, 1))
-            return Theta.theta_5a.reshape(1, -1) @ dRelu_dz(r1) @ Theta.theta_6 @ sum([self.dmu_dtheta(Theta, S, i, t, v) for v in self.G.vertices])
+            ra_1 = Theta.theta_6 @ mu_list[-1] @ np.ones((self.m, 1))
+            ra = (Theta.theta_5a.reshape(1, -1) @ self.dRelu_dz(ra_1) @ Theta.theta_6 @
+                  sum([self.dmu_dtheta(Theta, S, i, mu_list, u) for u in self.G.vertices]))
+            rb_1 = Theta.theta_7 @ mu_list[-1] @ self.unit_vec(v)
+            rb = (Theta.theta_5b.reshape(1, -1) @ self.dRelu_dz(rb_1) @ Theta.theta_7 @
+                  self.dmu_dtheta(Theta, S, i, mu_list, v))
+            return ra + rb
 
     def dRelu_dz(self, z):
         return np.diag(np.vectorize(lambda i: int(i > 0))(z))
+
+    def dmu_dtheta(self, Theta, S, i, mu_list, v):
+        r_relu = self.dRelu_dz(mu_list[-1] @ self.unit_vec(v))
+        r_1 = self.dthetafunc_dtheta_1(S, i, v)
+        r_2 = self.dthetafunc_dtheta_2(Theta, S, i, mu_list[:-1], v)
+        r_3 = self.dthetafunc_dtheta_3(Theta, i, v)
+        return r_relu @ (r_1 + r_2 + r_3)
+
+
+
 
 
 
