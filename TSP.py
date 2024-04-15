@@ -72,7 +72,7 @@ class TSP:
         mu = mu_list[-1]
         r1 = Theta.theta_5a.reshape(1, -1) @ self.relu(Theta.theta_6 @ mu @ np.ones((self.G.n, self.G.n)))
         r2 = Theta.theta_5b.reshape(1, -1) @ self.relu(Theta.theta_7 @ mu)
-        return (r1 + r2), mu_list
+        return (r1 + r2)[0], mu_list
 
     def S_not(self, S):
         return set(self.G.vertices).difference(S)
@@ -80,7 +80,7 @@ class TSP:
     def policy(self, Theta, S, S_not = None):
         S_not = self.S_not(S) if S_not is None else S_not
         Qvec, mu_list = self.Q_vec_mu_list(Theta, S)
-        print(Qvec)
+        #print(Qvec)
         vQs = [(v, Qvec[v]) for v in S_not]
         return reduce(lambda t1, t2: t2 if t1[0] is None or t2[1] > t1[1] else t1, vQs, (None, None)), mu_list
 
@@ -108,7 +108,8 @@ class TSP:
         w = self.G.dist_matrix
         def f(C):
             t = len(C)
-            c = C[-1] + w[(S[t-1], S[0])] - w[(S[t-1], S[t])] - w[(S[t], S[0])]
+            c_prev = 0 if len(C) == 0 else C[-1]
+            c = c_prev + w[(S[t-1], S[0])] - w[(S[t-1], S[t])] - w[(S[t], S[0])]
             return C + [c]
         return f
 
@@ -131,6 +132,12 @@ class TSP:
 
     def QLearning(self, Theta):
         def QLearn_recurse(S, C, M, Theta, t):
+            print(50 * "=")
+            print("S: {}".format(S))
+            print("C: {}".format(C))
+            print("M: {}".format(M))
+            #print("Theta: {}".format(Theta))
+            print("t: {}".format(t))
             if t == self.m:
                 return Theta
             else:
@@ -172,7 +179,7 @@ class TSP:
             return self.dQ_dtheta(Theta, S, v, i)
 
     def dRelu_dz(self, z):
-        return np.diag(np.vectorize(lambda i: int(i > 0))(z))
+        return np.diag(np.vectorize(lambda i: int(i > 0))(z)[:, 0])
 
     def dmu_dtheta(self, Theta, S, i, mu_list, v):
         r_relu = self.dRelu_dz(mu_list[-1] @ self.unit_vec(v))

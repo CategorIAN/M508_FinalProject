@@ -1,34 +1,17 @@
 from RandomEuclideanGraph import RandomEuclideanGraph
 from TSP import TSP
 import numpy as np
-from Theta import RandomTheta
+from Theta import RandomThetaObject
 
 def f(i):
     if i == 1:
         G = RandomEuclideanGraph()
         print(G.points)
-        walk = G.randomHamCycle()
-        print(walk)
-        print(G.walkDistance(walk))
-        print(G.neighbors)
-    if i == 2:
-        G = RandomEuclideanGraph()
-        print(G.points)
-        p = 3
-        T = 4
-        tsp = TSP(G, T, 0.01, 2)
-        thetas = RandomTheta(p)
-        S = [0]
-        print(tsp.policy(thetas, S))
-    if i == 4:
-        G = RandomEuclideanGraph()
-        print(G.points)
-        p = 3
-        T = 4
-        tsp = TSP(G, T)
-        thetas = RandomTheta(p)
-        S = [0]
-        print(tsp.policy(thetas)(S))
+        Theta = RandomThetaObject(3)
+        T, eps, n, alpha = 2, 0.01, 1, 0.01
+        tsp = TSP(G, T, eps, n, alpha)
+        tsp.QLearning(Theta)
+
 if __name__ == '__main__':
-    f(2)
+    f(1)
 

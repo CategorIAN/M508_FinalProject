@@ -7,6 +7,10 @@ class ThetaObject:
         self.theta_5a, self.theta_5b, self.theta_6, self.theta_7 = thetas[4:]
         self.p = self.theta_1.shape[0]
 
+    def __str__(self):
+        names = ["theta_1", "theta_2", "theta_3", "theta_4", "theta_5a", "theta_5b", "theta_6"]
+        r = "\n".join([20*"-" + "\n{}\n{}".format(name, theta) for (name, theta) in zip(names, self.thetas)])
+        return r
 
 class RandomThetaObject (ThetaObject):
     def __init__(self, p):
