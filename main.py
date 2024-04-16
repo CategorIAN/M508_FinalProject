@@ -10,7 +10,7 @@ def f(i):
         Theta = RandomThetaObject(3)
         T, eps, n, alpha = 2, 0.01, 1, 0.01
         tsp = TSP(G, T, eps, n, alpha)
-        tsp.QLearning(Theta)
+        print(tsp.QLearning(Theta))
 
 if __name__ == '__main__':
     f(1)
