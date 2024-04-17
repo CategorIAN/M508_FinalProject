@@ -120,9 +120,9 @@ class TSP:
 
     def updated_theta(self, Theta, S_past, v_past, R_diff, S):
         def f(i):
-            if i in {0, 3, 4, 5}:
+            if i in {0, 3, 4, 5, 6, 7}:
                 return (Theta.thetas[i] -
-                        self.alpha * self.dJ_dtheta(Theta, S_past, v_past, R_diff, S, i).reshape(-1, 1))
+                        self.alpha * self.dJ_dtheta(Theta, S_past, v_past, R_diff, S, i).T)
             else:
                 return Theta.thetas[i]
         return f
@@ -182,6 +182,10 @@ class TSP:
             return self.relu(ra_1).reshape(1, -1)
         elif i == 5:
             return self.relu(rb_1).reshape(1, -1)
+        elif i == 6:
+            return np.outer(mu_list[-1] @ np.ones((self.m, 1)), Theta.theta_5a.reshape(1, -1) @ self.dRelu_dz(ra_1))
+        elif i == 7:
+            return np.outer(mu_list[-1] @ self.unit_vec(v), Theta.theta_5b.reshape(1, -1) @ self.dRelu_dz(rb_1))
 
     def dQBest_dtheta(self, Theta, S, i):
         S_not = self.S_not(S)
