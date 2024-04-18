@@ -1,6 +1,5 @@
 from RandomEuclideanGraph import RandomEuclideanGraph
 from TSP import TSP
-import numpy as np
 from Theta import RandomThetaObject
 
 def f(i):
@@ -10,7 +9,8 @@ def f(i):
         Theta = RandomThetaObject(3)
         T, eps, n, alpha = 2, 0.01, 1, 0.01
         tsp = TSP(T, eps, n, alpha)
-        print(tsp.QLearning(Theta, G))
+        G_S_list, (Theta_final, M_final) = tsp.QLearning(Theta, 5)
+        print(G_S_list)
 
 if __name__ == '__main__':
     f(1)

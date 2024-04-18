@@ -2,10 +2,10 @@ import numpy as np
 from functools import reduce
 from Theta import ThetaObject
 import random
+from RandomEuclideanGraph import RandomEuclideanGraph
 
 class TSP:
     def __init__(self, T, eps, n, alpha):
-        #self.G = G
         self.T = T
         self.eps = eps
         self.n = n
@@ -69,7 +69,6 @@ class TSP:
 
     def R(self, C, t, n):
         return C[t + n - 1] - C[t - 1]
-
 
     def dRelu_dz(self, z):
         return np.diag(np.vectorize(lambda i: int(i > 0))(z)[:, 0])
@@ -147,7 +146,6 @@ class TSP:
         z = R_diff + self.QBest(Theta, G, S) - self.Q_vec_mu_list(Theta, G, S_past)[0][v_past]
         return z * self.dz_dtheta(Theta, G, S_past, v_past, S, i)
 
-
     def updated_S(self, Theta, G):
         def f(S):
             S_not = self.S_not(G, S)
@@ -163,51 +161,65 @@ class TSP:
             return C + [c]
         return f
 
-    def updated_M(self, S, C, t):
+    def updated_M(self, G, S, C, t):
         def f(M):
-            return M + [(S[:(t-self.n)], S[t-self.n], self.R(C, t-self.n, self.n), S)] if t >= self.n else M
+            return M + [(G, S[:(t-self.n)], S[t-self.n], self.R(C, t-self.n, self.n), S)] if t >= self.n else M
         return f
 
-    def updated_theta(self, Theta, G, B):
+    def updated_theta(self, Theta, B):
         def f(i):
             if i in {0, 2, 3, 4, 5, 6, 7}:
-                batch_gradient = 1 / len(B) * sum([self.dJ_dtheta(Theta, G, *b, i).T for b in B])
+                batch_gradient = 1 / len(B) * sum([self.dJ_dtheta(Theta, *b, i).T for b in B])
                 return Theta.thetas[i] - self.alpha * batch_gradient
             else:
                 return Theta.thetas[i]
         return f
 
-    def updated_Theta(self, G, M, t):
+    def updated_Theta(self, M, t):
         def f(Theta):
             if t >= self.n:
                 r = min(len(M), 5)
                 B = random.sample(M, r)
-                theta_func = self.updated_theta(Theta, G, B)
+                theta_func = self.updated_theta(Theta, B)
                 thetas_new = [theta_func(i) for i in range(8)]
                 return ThetaObject(thetas_new)
             else:
                 return Theta
         return f
 
-    def QLearning(self, Theta_init, G):
+    def episode(self, Theta, M, G):
+        print(100 * "#")
+        print(G)
         def QLearn_recurse(S, C, M, Theta, t):
+            """
             print(50 * "=")
             print("S: {}".format(S))
             print("C: {}".format(C))
             print("M: {}".format(M))
             print("Theta:\n{}".format(Theta))
             print("t: {}".format(t))
+            """
             if t == G.n:
-                return Theta
+                return Theta, M, S
             else:
                 S_new = self.updated_S(Theta, G)(S)
                 C_new = self.updated_C(G, S_new)(C)
                 t = len(S)
-                M_new = self.updated_M(S, C, t)(M)
-                Theta_new = self.updated_Theta(G, M_new, t)(Theta)
+                M_new = self.updated_M(G, S, C, t)(M)
+                Theta_new = self.updated_Theta(M_new, t)(Theta)
                 return QLearn_recurse(S_new, C_new, M_new, Theta_new, t + 1)
-        S, C, M = ([], [], [])
-        return QLearn_recurse(S, C, M, Theta_init, 0)
+
+        return QLearn_recurse([], [], M, Theta, 0)
+
+    def QLearning(self, Theta_init, L):
+        def appendEpisodeResults(results, G):
+            G_S_list, (Theta, M) = results
+            Theta_new, M_new, S = self.episode(Theta, M, G)
+            return G_S_list + [(G, S)], (Theta_new, M_new)
+
+        Gs = [RandomEuclideanGraph() for i in range(L)]
+        return reduce(appendEpisodeResults, Gs, ([], (Theta_init, [])))
+
 
 
 

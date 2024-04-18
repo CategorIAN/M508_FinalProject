@@ -16,6 +16,7 @@ class CompleteGraph:
         self.N = self.neighbor_matrix()
         self.U = self.getU()
 
+
     def closeWalk(self, w):
         return w + [w[0]] if len(w) > 0 and w[-1] != w[0] else w
 

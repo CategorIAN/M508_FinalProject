@@ -9,3 +9,9 @@ class EuclideanGraph(CompleteGraph):
         n = len(pt_array)
         dist_matrix = np.array([[dist(i, j) for j in range(n)] for i in range(n)])
         super().__init__(dist_matrix)
+
+    def __repr__(self):
+        return "Graph{}".format(set(self.points))
+
+    def __str__(self):
+        return "Graph{}".format(set(self.points))

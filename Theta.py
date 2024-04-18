@@ -12,6 +12,11 @@ class ThetaObject:
         r = "\n".join([20*"-" + "\n{}\n{}".format(name, theta) for (name, theta) in zip(names, self.thetas)])
         return r
 
+    def __repr__(self):
+        names = ["theta_1", "theta_2", "theta_3", "theta_4", "theta_5a", "theta_5b", "theta_6", "theta_7"]
+        r = "\n".join([20 * "-" + "\n{}\n{}".format(name, theta) for (name, theta) in zip(names, self.thetas)])
+        return r
+
 class RandomThetaObject (ThetaObject):
     def __init__(self, p):
         theta_1 = np.random.rand(p, 1)
