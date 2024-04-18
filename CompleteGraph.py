@@ -10,8 +10,11 @@ class CompleteGraph:
         self.n = n
         self.vertices = list(range(self.n))
         self.edges = list(product(range(self.n)))
-        self.dist_matrix = dist_matrix
+        self.w = dist_matrix
+        self.W = self.w.flatten()
         self.neighbors = dict([(i, set(self.filter(self.vertices, lambda j: j != i))) for i in self.vertices])
+        self.N = self.neighbor_matrix()
+        self.U = self.getU()
 
     def closeWalk(self, w):
         return w + [w[0]] if len(w) > 0 and w[-1] != w[0] else w
@@ -25,8 +28,24 @@ class CompleteGraph:
                 return distance
             else:
                 next_v, remaining = toWalk[0], toWalk[1:]
-                return recurse(distance + self.dist_matrix[(current_v, next_v)], next_v, remaining)
+                return recurse(distance + self.w[(current_v, next_v)], next_v, remaining)
         return 0 if len(walk) == 0 else recurse(0, walk[0], walk[1:])
 
     def filter(self, s, predicate):
         return reduce(lambda v, i: v + [i] if predicate(i) else v, s, [])
+
+    def neighbor_vec(self, v):
+        neighbors = self.neighbors[v]
+        return np.vectorize(lambda i: int(i in neighbors))(self.vertices).reshape(-1, 1)
+
+    def neighbor_matrix(self):
+        return np.concatenate([self.neighbor_vec(v) for v in self.vertices], axis = 1)
+
+    def unit_vec(self, v):
+        return np.vectorize(lambda i: int(i == v))(self.vertices).reshape(-1, 1)
+
+    def neighbor_square(self, v):
+        return np.outer(self.neighbor_vec(v), self.unit_vec(v).reshape(1, -1))
+
+    def getU(self):
+        return np.concatenate([self.neighbor_square(v) for v in self.vertices], axis=0)

@@ -9,8 +9,8 @@ def f(i):
         print(G.points)
         Theta = RandomThetaObject(3)
         T, eps, n, alpha = 2, 0.01, 1, 0.01
-        tsp = TSP(G, T, eps, n, alpha)
-        print(tsp.QLearning(Theta))
+        tsp = TSP(T, eps, n, alpha)
+        print(tsp.QLearning(Theta, G))
 
 if __name__ == '__main__':
     f(1)
