@@ -80,7 +80,6 @@ class TSP:
     def policy(self, Theta, S, S_not = None):
         S_not = self.S_not(S) if S_not is None else S_not
         Qvec, mu_list = self.Q_vec_mu_list(Theta, S)
-        #print(Qvec)
         vQs = [(v, Qvec[v]) for v in S_not]
         return reduce(lambda t1, t2: t2 if t1[0] is None or t2[1] > t1[1] else t1, vQs, (None, None)), mu_list
 
@@ -100,7 +99,7 @@ class TSP:
     def updated_S(self, Theta):
         def f(S):
             S_not = self.S_not(S)
-            v = np.random.choice(S_not) if np.random.rand() < self.eps else self.vBest(Theta, S, S_not)
+            v = np.random.choice(list(S_not)) if np.random.rand() < self.eps else self.vBest(Theta, S, S_not)
             return S + [v]
         return f
 
@@ -120,7 +119,7 @@ class TSP:
 
     def updated_theta(self, Theta, S_past, v_past, R_diff, S):
         def f(i):
-            if i in {0, 3, 4, 5, 6, 7}:
+            if i in {0, 2, 3, 4, 5, 6, 7}:
                 return (Theta.thetas[i] -
                         self.alpha * self.dJ_dtheta(Theta, S_past, v_past, R_diff, S, i).T)
             else:
@@ -144,7 +143,7 @@ class TSP:
             print("S: {}".format(S))
             print("C: {}".format(C))
             print("M: {}".format(M))
-            print("Theta: {}".format(Theta))
+            print("Theta:\n{}".format(Theta))
             print("t: {}".format(t))
             if t == self.m:
                 return Theta
@@ -158,9 +157,6 @@ class TSP:
         S, C, M = ([], [], [])
         return QLearn_recurse(S, C, M, Theta, 0)
 
-    def dJ_dTheta(self, Theta, S_past, v_past, R_diff, S):
-        return [self.dJ_dtheta(Theta, S_past, v_past, R_diff, S, i) for i in range(len(Theta.thetas))]
-
     def dJ_dtheta(self, Theta, S_past, v_past, R_diff, S, i):
         z = R_diff + self.QBest(Theta, S) - self.Q_vec_mu_list(Theta, S_past)[0][v_past]
         return z * self.dz_dtheta(Theta, S_past, v_past, S, i)
@@ -172,11 +168,11 @@ class TSP:
         Q_vec, mu_list = self.Q_vec_mu_list(Theta, S)
         ra_1 = Theta.theta_6 @ mu_list[-1] @ np.ones((self.m, 1))
         rb_1 = Theta.theta_7 @ mu_list[-1] @ self.unit_vec(v)
-        if i in {0, 3}:
-            ra = (Theta.theta_5a.reshape(1, -1) @ self.dRelu_dz(ra_1) @ Theta.theta_6 @
-                  sum([self.dmu_dtheta(Theta, S, i, mu_list[:-1], u) for u in self.G.vertices]))
-            rb = (Theta.theta_5b.reshape(1, -1) @ self.dRelu_dz(rb_1) @ Theta.theta_7 @
-                  self.dmu_dtheta(Theta, S, i, mu_list[:-1], v))
+        if i in {0, 2, 3}:
+            ra_2 = Theta.theta_5a.reshape(1, -1) @ self.dRelu_dz(ra_1) @ Theta.theta_6
+            ra = sum([self.dmu_dtheta(ra_2, Theta, S, i, mu_list[:-1], u) for u in self.G.vertices])
+            rb_2 = Theta.theta_5b.reshape(1, -1) @ self.dRelu_dz(rb_1) @ Theta.theta_7
+            rb = self.dmu_dtheta(rb_2, Theta, S, i, mu_list[:-1], v)
             return ra + rb
         elif i == 4:
             return self.relu(ra_1).reshape(1, -1)
@@ -198,37 +194,45 @@ class TSP:
     def dRelu_dz(self, z):
         return np.diag(np.vectorize(lambda i: int(i > 0))(z)[:, 0])
 
-    def dmu_dtheta(self, Theta, S, i, mu_list, v):
+    def dmu_dtheta(self, r, Theta, S, i, mu_list, v):
         if len(mu_list) == 0:
-            return np.zeros((Theta.p, Theta.p))
+            if i in {0, 3}:
+                return np.zeros((1, Theta.p))
+            elif i in {1, 2}:
+                return np.zeros((Theta.p, Theta.p))
         else:
             z = (Theta.theta_1 * self.x(S)[v] + Theta.theta_2 @ mu_list[-1] @ self.N[:, v] +
             Theta.theta_3 @ self.relu(np.outer(Theta.theta_4, self.W)) @ self.U[:, v])
-            r_relu = self.dRelu_dz(z)
-            r_1 = self.dthetafunc_dtheta_1(Theta, S, i, v)
-            r_2 = self.dthetafunc_dtheta_2(Theta, S, i, mu_list, v)
-            r_3 = self.dthetafunc_dtheta_3(Theta, i, v)
-        return r_relu @ (r_1 + r_2 + r_3)
+            r_new = r @ self.dRelu_dz(z)
+            r_1 = self.dthetafunc_dtheta_1(r_new, Theta, S, i, v)
+            r_2 = self.dthetafunc_dtheta_2(r_new, Theta, S, i, mu_list, v)
+            r_3 = self.dthetafunc_dtheta_3(r_new, Theta, i, v)
+            return r_1 + r_2 + r_3
 
-    def dthetafunc_dtheta_1(self, Theta, S, i, v):
+    def dthetafunc_dtheta_1(self, r, Theta, S, i, v):
         if i in {0}:
-            return self.x(S)[v] * np.eye(Theta.p)
-        else:
+            return r @ (self.x(S)[v] * np.eye(Theta.p))
+        elif i in {2}:
             return np.zeros((Theta.p, Theta.p))
+        elif i in {3}:
+            return np.zeros((1, Theta.p))
 
-    def dthetafunc_dtheta_2(self, Theta, S, i, mu_list, v):
-        if i in {0, 3}:
-            return Theta.theta_2 @ sum([self.dmu_dtheta(Theta, S, i, mu_list[:-1], u) for u in self.neighbors(v)])
+    def dthetafunc_dtheta_2(self, r, Theta, S, i, mu_list, v):
+        if i in {0, 2, 3}:
+            r_new = r @ Theta.theta_2
+            return sum([self.dmu_dtheta(r_new, Theta, S, i, mu_list[:-1], u) for u in self.neighbors(v)])
         else:
-            return np.zeros((Theta.p, Theta.p))
+            return np.zeros((1, Theta.p))
 
-    def dthetafunc_dtheta_3(self, Theta, i, v):
-        if i in {3}:
+    def dthetafunc_dtheta_3(self, r, Theta, i, v):
+        if i in {2}:
+            return np.outer(self.relu(np.outer(Theta.theta_4, self.W)) @ self.U @ self.unit_vec(v), r)
+        elif i in {3}:
             w = self.G.dist_matrix
-            return (Theta.theta_3 @ sum([self.dRelu_dz(Theta.theta_4 * w[(v, u)]) @
+            return (r @ Theta.theta_3 @ sum([self.dRelu_dz(Theta.theta_4 * w[(v, u)]) @
                                          (w[(v, u)] * np.eye(Theta.p, Theta.p)) for u in self.neighbors(v)]))
         else:
-            return np.zeros((Theta.p, Theta.p))
+            return np.zeros((1, Theta.p))
 
 
 
