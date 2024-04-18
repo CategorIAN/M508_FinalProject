@@ -117,11 +117,11 @@ class TSP:
             return M + [(S[:(t-self.n)], S[t-self.n], self.R(C, t-self.n, self.n), S)] if t >= self.n else M
         return f
 
-    def updated_theta(self, Theta, S_past, v_past, R_diff, S):
+    def updated_theta(self, Theta, B):
         def f(i):
             if i in {0, 2, 3, 4, 5, 6, 7}:
-                return (Theta.thetas[i] -
-                        self.alpha * self.dJ_dtheta(Theta, S_past, v_past, R_diff, S, i).T)
+                batch_gradient = 1 / len(B) * sum([self.dJ_dtheta(Theta, *b, i).T for b in B])
+                return Theta.thetas[i] - self.alpha * batch_gradient
             else:
                 return Theta.thetas[i]
         return f
@@ -129,8 +129,9 @@ class TSP:
     def updated_Theta(self, M, t):
         def f(Theta):
             if t >= self.n:
-                (S_past, v_past, R_diff, S) = self.B(1, M)[0]
-                theta_func = self.updated_theta(Theta, S_past, v_past, R_diff, S)
+                r = min(len(M), 5)
+                B = random.sample(M, r)
+                theta_func = self.updated_theta(Theta, B)
                 thetas_new = [theta_func(i) for i in range(8)]
                 return ThetaObject(thetas_new)
             else:
