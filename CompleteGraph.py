@@ -4,13 +4,16 @@ from functools import reduce
 import random
 class CompleteGraph:
     def __init__(self, dist_matrix):
+        '''
+        :param dist_matrix: n by n matrix w where w[(i, j)] is the weight of the edge (i, j) and where w[(i, i)] = 0
+        '''
         m, n = dist_matrix.shape
         if m != n:
             raise AttributeError("Matrix is Not Square")
         self.n = n
         self.vertices = list(range(self.n))
         self.edges = list(product(range(self.n)))
-        self.w = dist_matrix
+        self.w = (np.ones((n, n)) - np.eye(n)) * dist_matrix
         self.W = self.w.flatten()
         self.neighbors = dict([(i, set(self.filter(self.vertices, lambda j: j != i))) for i in self.vertices])
         self.N = self.neighbor_matrix()

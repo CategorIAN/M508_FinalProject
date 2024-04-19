@@ -2,6 +2,9 @@ import numpy as np
 
 class ThetaObject:
     def __init__(self, thetas):
+        '''
+        :param thetas: list of theta vectors/matrices to use
+        '''
         self.thetas = thetas
         self.theta_1, self.theta_2, self.theta_3, self.theta_4 = thetas[:4]
         self.theta_5a, self.theta_5b, self.theta_6, self.theta_7 = thetas[4:]
@@ -19,6 +22,9 @@ class ThetaObject:
 
 class RandomThetaObject (ThetaObject):
     def __init__(self, p):
+        '''
+        :param p: the dimension to use for the theta weights
+        '''
         theta_1 = np.random.rand(p, 1)
         theta_2 = np.random.rand(p, p)
         theta_3 = np.random.rand(p, p)
