@@ -3,13 +3,15 @@ from functools import reduce
 from Theta import ThetaObject
 import random
 from RandomEuclideanGraph import RandomEuclideanGraph
+from Theta import RandomThetaObject
 
 class TSP:
-    def __init__(self, T, eps, n, alpha):
+    def __init__(self, T, eps, n, alpha, p):
         self.T = T
         self.eps = eps
         self.n = n
         self.alpha = alpha
+        self.p = p
 
     def filter(self, s, predicate):
         return reduce(lambda v, i: v + [i] if predicate(i) else v, s, [])
@@ -76,26 +78,30 @@ class TSP:
     def dthetafunc_dtheta_1(self, r, Theta, G, S, i, v):
         if i in {0}:
             return r @ (self.x(G, S)[v] * np.eye(Theta.p))
-        elif i in {2}:
+        elif i in {1, 2}:
             return np.zeros((Theta.p, Theta.p))
         elif i in {3}:
             return np.zeros((1, Theta.p))
 
     def dthetafunc_dtheta_2(self, r, Theta, G, S, i, mu_list, v):
+        r_new = r @ Theta.theta_2
+        neighbor_dmu = lambda u: self.dmu_dtheta(r_new, Theta, G, S, i, mu_list[:-1], u)
         if i in {0, 2, 3}:
-            r_new = r @ Theta.theta_2
-            return sum([self.dmu_dtheta(r_new, Theta, G, S, i, mu_list[:-1], u) for u in G.neighbors[v]])
-        else:
-            return np.zeros((1, Theta.p))
+            return sum([neighbor_dmu(u) for u in G.neighbors[v]])
+        elif i in {1}:
+            neighbor_outerproduct = lambda u: np.outer(mu_list[-1] @ G.unit_vec(u), r)
+            return sum([neighbor_dmu(u) + neighbor_outerproduct(u) for u in G.neighbors[v]])
 
     def dthetafunc_dtheta_3(self, r, Theta, G, i, v):
-        if i in {2}:
+        if i in {0}:
+            return np.zeros((1, Theta.p))
+        elif i in {1}:
+            return np.zeros((Theta.p, Theta.p))
+        elif i in {2}:
             return np.outer(self.relu(np.outer(Theta.theta_4, G.W)) @ G.U @ G.unit_vec(v), r)
         elif i in {3}:
             return (r @ Theta.theta_3 @ sum([self.dRelu_dz(Theta.theta_4 * G.w[(v, u)]) @
                                          (G.w[(v, u)] * np.eye(Theta.p, Theta.p)) for u in G.neighbors[v]]))
-        else:
-            return np.zeros((1, Theta.p))
 
     def dmu_dtheta(self, r, Theta, G, S, i, mu_list, v):
         if len(mu_list) == 0:
@@ -116,7 +122,7 @@ class TSP:
         Q_vec, mu_list = self.Q_vec_mu_list(Theta, G, S)
         ra_1 = Theta.theta_6 @ mu_list[-1] @ np.ones((G.n, 1))
         rb_1 = Theta.theta_7 @ mu_list[-1] @ G.unit_vec(v)
-        if i in {0, 2, 3}:
+        if i in {0, 1, 2, 3}:
             ra_2 = Theta.theta_5a.reshape(1, -1) @ self.dRelu_dz(ra_1) @ Theta.theta_6
             ra = sum([self.dmu_dtheta(ra_2, Theta, G, S, i, mu_list[:-1], u) for u in G.vertices])
             rb_2 = Theta.theta_5b.reshape(1, -1) @ self.dRelu_dz(rb_1) @ Theta.theta_7
@@ -168,7 +174,7 @@ class TSP:
 
     def updated_theta(self, Theta, B):
         def f(i):
-            if i in {0, 2, 3, 4, 5, 6, 7}:
+            if i in {0, 1, 2, 3, 4, 5, 6, 7}:
                 batch_gradient = 1 / len(B) * sum([self.dJ_dtheta(Theta, *b, i).T for b in B])
                 return Theta.thetas[i] - self.alpha * batch_gradient
             else:
@@ -211,14 +217,14 @@ class TSP:
 
         return QLearn_recurse([], [], M, Theta, 0)
 
-    def QLearning(self, Theta_init, L):
+    def QLearning(self, L):
         def appendEpisodeResults(results, G):
             G_S_list, (Theta, M) = results
             Theta_new, M_new, S = self.episode(Theta, M, G)
             return G_S_list + [(G, S)], (Theta_new, M_new)
 
         Gs = [RandomEuclideanGraph() for i in range(L)]
-        return reduce(appendEpisodeResults, Gs, ([], (Theta_init, [])))
+        return reduce(appendEpisodeResults, Gs, ([], (RandomThetaObject(self.p), [])))
 
 
 
