@@ -309,7 +309,7 @@ class TSP:
         z = R_diff + self.gamma * self.QBest(Theta, G, S) - self.Q_vec_mu_list(Theta, G, S_past)[0][v_past]
         return z * self.dz_dtheta(Theta, G, S_past, v_past, S, i)
 
-    def updated_S(self, Theta, G):
+    def updated_S(self, Theta, G, exploreOption = True):
         '''
         :param Theta: object consisting of list of theta weights
         :param G: graph
@@ -317,7 +317,8 @@ class TSP:
         '''
         def f(S):
             S_not = self.S_not(G, S)
-            v = np.random.choice(list(S_not)) if np.random.rand() < self.eps else self.vBest(Theta, G, S, S_not)
+            explore = exploreOption and (np.random.rand() < self.eps)
+            v = np.random.choice(list(S_not)) if explore else self.vBest(Theta, G, S, S_not)
             return S + [v]
         return f
 
@@ -384,17 +385,15 @@ class TSP:
         :param G: graph
         :return: (Theta_new, M_new, S) where (Theta_new, M_new) are updated and S is the permutation used for graph G
         '''
-        print(100 * "#")
-        print(G)
         def QLearn_recurse(S, C, M, Theta, t):
-            """
+
             print(50 * "=")
             print("S: {}".format(S))
-            print("C: {}".format(C))
-            print("M: {}".format(M))
-            print("Theta:\n{}".format(Theta))
+            #print("C: {}".format(C))
+            #print("M: {}".format(M))
+            #print("Theta:\n{}".format(Theta))
             print("t: {}".format(t))
-            """
+
             if t == G.n:
                 return Theta, M, S
             else:
@@ -407,7 +406,7 @@ class TSP:
 
         return QLearn_recurse([], [], M, Theta, 0)
 
-    def QLearning(self, L):
+    def QLearning(self, Gs):
         '''
         :param L: number of episodes to use
         :return: (G_S_list, (Theta, M)) where G_S_list is a list of (G, S) for graph G and its corresponding
@@ -418,8 +417,14 @@ class TSP:
             Theta_new, M_new, S = self.episode(Theta, M, G)
             return G_S_list + [(G, S)], (Theta_new, M_new)
 
-        Gs = [RandomEuclideanGraph() for i in range(L)]
-        return reduce(appendEpisodeResults, Gs, ([], (RandomThetaObject(self.p), [])))
+        G_S_list_final, (Theta_final, _) = reduce(appendEpisodeResults, Gs, ([], (RandomThetaObject(self.p), [])))
+        return G_S_list_final, Theta_final
+
+    def calculateWalk(self, Theta, G):
+        appendS = lambda i, S: S if i == G.n else appendS(i + 1, self.updated_S(Theta, G)(S))
+        return appendS(0, [])
+
+
 
 
 
