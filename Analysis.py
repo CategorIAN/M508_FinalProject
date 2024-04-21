@@ -71,7 +71,7 @@ class Analysis:
             df = error_row(0)
             df.to_csv("\\".join([os.getcwd(), "Error", "Error.csv"]))
 
-        print("Time Elapsed: {} Seconds".format(time.time() - start_time))
+        print("Time Elapsed: {} Minutes".format((time.time() - start_time) / 60))
         return df
 
 
