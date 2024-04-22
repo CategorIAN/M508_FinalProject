@@ -2,7 +2,7 @@ from EuclideanGraph import EuclideanGraph
 import random
 
 class RandomEuclideanGraph(EuclideanGraph):
-    def __init__(self, pt_number = (4, 5), xlim = (-3, 3), ylim = (-3, 3)):
+    def __init__(self, pt_number = (9, 9), xlim = (-5, 5), ylim = (-5, 5)):
         '''
         :param pt_number: the number of two-dimensional points/vertices to use
         :param xlim: (x_min, x_max) where x_min is the min x coordinate and x_max is the max x coordinate for each point

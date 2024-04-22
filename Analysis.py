@@ -5,18 +5,26 @@ from itertools import product
 import time
 import pandas as pd
 import os
+from WalkedGraphs import WalkedGraphs
 
 class Analysis:
-    def __init__(self, n, hyp_range_dict):
-        self.n = n
-        self.data = [RandomRegularPolygon() for i in range(n)]
-        self.train_test_dict = self.get_train_test_dict(k=10)
+    def __init__(self, hyp_range_dict, k, n = None, graph_csv = True):
         self.hyp_dict = hyp_range_dict
         self.hyp_names = ["p", "T", "eps", "n", "alpha", "beta", "gamma"]
         hyp_combos = product(*[hyp_range_dict[name] for name in self.hyp_names])
         self.hyp_dicts = [dict(zip(self.hyp_names, hyp_values)) for hyp_values in hyp_combos]
         self.r = len(self.hyp_dicts)
 
+        if graph_csv:
+            self.graphs = WalkedGraphs(n, graph_csv).graphs
+
+        else:
+            Gs = WalkedGraphs(n, graph_csv)
+            Gs.getCSV()
+            self.graphs = WalkedGraphs(n, csv=True).graphs
+
+        self.n = len(self.graphs)
+        self.train_test_dict = self.get_train_test_dict(k=k)
 
     def partition(self, k):
         (q, r) = (self.n // k, self.n % k)
@@ -33,7 +41,7 @@ class Analysis:
     def approx_ratio(self, model, Theta):
         def f(G):
             S = model.calculateWalk(Theta, G)
-            return G.walkDistance(G.closeWalk(S)) / G.perimeter
+            return G.walkDistance(G.closeWalk(S)) / G.distance
         return f
 
     def hyp_error(self, hyp_dict):
@@ -41,7 +49,7 @@ class Analysis:
         tsp = TSP_Q(*hyp_params)
         def fold_error(fold):
             train, test = self.train_test_dict[fold]
-            trainGs, testGs = [self.data[i] for i in train], [self.data[i] for i in test]
+            trainGs, testGs = [self.graphs[i] for i in train], [self.graphs[i] for i in test]
             _, Theta = tsp.QLearning(trainGs)
             approx_ratio_func = self.approx_ratio(tsp, Theta)
             return 1 / len(test) * sum([approx_ratio_func(G) for G in testGs])
