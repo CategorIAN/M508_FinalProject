@@ -2,10 +2,9 @@ import numpy as np
 from functools import reduce
 from Theta import ThetaObject
 import random
-from RandomEuclideanGraph import RandomEuclideanGraph
 from Theta import RandomThetaObject
 
-class TSP:
+class TSP_Q:
     def __init__(self, p, T, eps, n, alpha, beta, gamma):
         '''
         :param p: the dimension of the vertex embedding

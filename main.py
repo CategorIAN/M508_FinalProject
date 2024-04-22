@@ -1,4 +1,4 @@
-from TSP import TSP
+from TSP_Q import TSP
 from RegularPolygon import RandomRegularPolygon
 from Analysis import Analysis
 

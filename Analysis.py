@@ -1,5 +1,5 @@
 from RegularPolygon import RandomRegularPolygon
-from TSP import TSP
+from TSP_Q import TSP_Q
 from functools import reduce
 from itertools import product
 import time
@@ -38,7 +38,7 @@ class Analysis:
 
     def hyp_error(self, hyp_dict):
         hyp_params = [hyp_dict[k] for k in self.hyp_names]
-        tsp = TSP(*hyp_params)
+        tsp = TSP_Q(*hyp_params)
         def fold_error(fold):
             train, test = self.train_test_dict[fold]
             trainGs, testGs = [self.data[i] for i in train], [self.data[i] for i in test]
