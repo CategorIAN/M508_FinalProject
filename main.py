@@ -1,6 +1,8 @@
-from TSP_Q import TSP
-from RegularPolygon import RandomRegularPolygon
+from TSP_Q import TSP_Q
+from RegularPolygon import RandomRegularPolygon, RegularPolygon
 from Analysis import Analysis
+from TSP_HK import TSP_HK
+from RandomEuclideanGraph import RandomEuclideanGraph
 
 def f(i):
     if i == 1:
@@ -14,7 +16,12 @@ def f(i):
                     "alpha": [0.01, 0.1], "beta": [5, 10], "gamma": [0.9, 1]}
         A = Analysis(10, hyp_range_dict)
         A.getErrorDf(append = True)
+    if i == 3:
+        G = RandomEuclideanGraph()
+        tsp = TSP_HK()
+        print(tsp.calculateWalk(G))
+
 
 if __name__ == '__main__':
-    f(2)
+    f(3)
 
