@@ -14,7 +14,7 @@ def f(i):
         print(G_S_list)
     if i == 2:
         use_csvs = True
-        hyp_range_dict = {"p": [3, 4], "T": [2, 3], "eps": [0.01, 0.05], "n": [2, 3],
+        hyp_range_dict = {"p": [3, 4], "T": [2, 1], "eps": [0.01, 0.05], "n": [2, 3],
                     "alpha": [0.01, 0.1], "beta": [5, 10], "gamma": [0.9, 1]}
         A = Analysis(hyp_range_dict, 4, 8, graph_csv = use_csvs)
         A.getErrorDf(append = use_csvs)
