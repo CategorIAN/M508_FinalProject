@@ -11,10 +11,14 @@ from Analysis_3 import Analysis_3
 
 def f(i):
     if i == 1:
+        A = Analysis_2()
+        folder = "\\".join([os.getcwd(), "EuclideanGraphError"])
+        file = "Error.csv"
+        print(A.bestParams(folder, file))
+    if i == 2:
         A = Analysis_3()
-        A.learnWithBest()
-
+        A.getG_S_CSV()
 
 if __name__ == '__main__':
-    f(1)
+    f(2)
 

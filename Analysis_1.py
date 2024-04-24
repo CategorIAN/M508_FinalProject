@@ -1,4 +1,3 @@
-from RegularPolygon import RandomRegularPolygon
 from TSP_RL import TSP_RL
 from functools import reduce
 from itertools import product
@@ -8,7 +7,7 @@ import os
 from WalkedGraphs import WalkedGraphs
 
 class Analysis_1:
-    def __init__(self, hyp_range_dict, k, n = None, graph_csv = True):
+    def __init__(self, hyp_range_dict, k, n = None, graph_csv = "WalkedGraphs.csv"):
         self.hyp_dict = hyp_range_dict
         self.hyp_names = ["p", "T", "eps", "n", "alpha", "beta", "gamma"]
         hyp_combos = product(*[hyp_range_dict[name] for name in self.hyp_names])
@@ -18,11 +17,11 @@ class Analysis_1:
         self.train_test_dict = self.get_train_test_dict(k=k)
 
     def getGraphs(self, n, graph_csv):
-        if graph_csv:
+        if graph_csv is not None:
             return WalkedGraphs(n, graph_csv).graphs
         else:
             WalkedGraphs(n, graph_csv).getCSV()
-            return WalkedGraphs(n, csv=True).graphs
+            return WalkedGraphs(n, csv="WalkedGraphs.csv").graphs
 
     def partition(self, k):
         (q, r) = (self.n // k, self.n % k)
