@@ -35,6 +35,9 @@ class CompleteGraph:
                 return recurse(distance + self.w[(current_v, next_v)], next_v, remaining)
         return 0 if len(walk) == 0 else recurse(0, walk[0], walk[1:])
 
+    def tourDistance(self, S):
+        return self.walkDistance(self.closeWalk(S))
+
     def filter(self, s, predicate):
         return reduce(lambda v, i: v + [i] if predicate(i) else v, s, [])
 

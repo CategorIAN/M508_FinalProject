@@ -1,5 +1,5 @@
 from RegularPolygon import RandomRegularPolygon
-from TSP_Q import TSP_Q
+from TSP_RL import TSP_RL
 from functools import reduce
 from itertools import product
 import time
@@ -7,24 +7,22 @@ import pandas as pd
 import os
 from WalkedGraphs import WalkedGraphs
 
-class Analysis:
+class Analysis_1:
     def __init__(self, hyp_range_dict, k, n = None, graph_csv = True):
         self.hyp_dict = hyp_range_dict
         self.hyp_names = ["p", "T", "eps", "n", "alpha", "beta", "gamma"]
         hyp_combos = product(*[hyp_range_dict[name] for name in self.hyp_names])
         self.hyp_dicts = [dict(zip(self.hyp_names, hyp_values)) for hyp_values in hyp_combos]
-        self.r = len(self.hyp_dicts)
-
-        if graph_csv:
-            self.graphs = WalkedGraphs(n, graph_csv).graphs
-
-        else:
-            Gs = WalkedGraphs(n, graph_csv)
-            Gs.getCSV()
-            self.graphs = WalkedGraphs(n, csv=True).graphs
-
+        self.graphs = self.getGraphs(n, graph_csv)
         self.n = len(self.graphs)
         self.train_test_dict = self.get_train_test_dict(k=k)
+
+    def getGraphs(self, n, graph_csv):
+        if graph_csv:
+            return WalkedGraphs(n, graph_csv).graphs
+        else:
+            WalkedGraphs(n, graph_csv).getCSV()
+            return WalkedGraphs(n, csv=True).graphs
 
     def partition(self, k):
         (q, r) = (self.n // k, self.n % k)
@@ -41,12 +39,12 @@ class Analysis:
     def approx_ratio(self, model, Theta):
         def f(G):
             S = model.calculateWalk(Theta, G)
-            return G.walkDistance(G.closeWalk(S)) / G.distance
+            return G.tourDistance(S) / G.distance
         return f
 
     def hyp_error(self, hyp_dict):
         hyp_params = [hyp_dict[k] for k in self.hyp_names]
-        tsp = TSP_Q(*hyp_params)
+        tsp = TSP_RL(*hyp_params)
         def fold_error(fold):
             train, test = self.train_test_dict[fold]
             trainGs, testGs = [self.graphs[i] for i in train], [self.graphs[i] for i in test]
@@ -55,7 +53,6 @@ class Analysis:
             return 1 / len(test) * sum([approx_ratio_func(G) for G in testGs])
 
         return 1 / len(self.train_test_dict) * sum([fold_error(fold) for fold in self.train_test_dict.keys()])
-
 
     def getErrorDf(self, append = True):
         def error_row(i):
@@ -81,6 +78,10 @@ class Analysis:
 
         print("Time Elapsed: {} Minutes".format((time.time() - start_time) / 60))
         return df
+
+
+
+
 
 
 

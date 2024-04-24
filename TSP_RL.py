@@ -4,7 +4,7 @@ from Theta import ThetaObject
 import random
 from Theta import RandomThetaObject
 
-class TSP_Q:
+class TSP_RL:
     def __init__(self, p, T, eps, n, alpha, beta, gamma):
         '''
         :param p: the dimension of the vertex embedding
@@ -386,12 +386,12 @@ class TSP_Q:
         '''
         def QLearn_recurse(S, C, M, Theta, t):
 
-            print(50 * "=")
-            print("S: {}".format(S))
+            #print(50 * "=")
+            #print("S: {}".format(S))
             #print("C: {}".format(C))
             #print("M: {}".format(M))
             #print("Theta:\n{}".format(Theta))
-            print("t: {}".format(t))
+            #print("t: {}".format(t))
 
             if t == G.n:
                 return Theta, M, S
