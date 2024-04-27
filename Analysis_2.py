@@ -8,19 +8,19 @@ class Analysis_2(Analysis_1):
     def __init__(self):
         hyp_range_dict = {"p": [3, 4], "T": [2, 1], "eps": [0.01, 0.05], "n": [2, 3],
                           "alpha": [0.01, 0.1], "beta": [5, 10], "gamma": [0.9, 1]}
-        super().__init__(hyp_range_dict, 4)
-        self.folder = "\\".join([os.getcwd(), "EuclideanGraphError"])
-        self.file = "\\".join([self.folder, "Error.csv"])
+        graph_file = "\\".join([os.getcwd(), "Analysis_1", "OurWalkedGraphs.csv"])
+        super().__init__(hyp_range_dict, 4, graph_file = graph_file)
+        self.error_file = "\\".join([self.folder(1), "Error.csv"])
 
     def groupedErrorDf(self):
-        df = pd.read_csv(self.file, index_col=0)
+        df = pd.read_csv(self.error_file, index_col=0)
         return lambda name: df.groupby(by = [name])["Error"].mean()
 
     def groupedErrorDfs(self):
         groupedErrorDf_func = self.groupedErrorDf()
         def appendDf(df_dict, name):
             grouped_df = groupedErrorDf_func(name)
-            grouped_df.to_csv("\\".join([self.folder, "Error_By_{}.csv".format(name)]))
+            grouped_df.to_csv("\\".join([self.folder(2), "Error_By_{}.csv".format(name)]))
             return df_dict | {name: grouped_df}
         return reduce(appendDf, self.hyp_names, {})
 
@@ -51,8 +51,8 @@ class Analysis_2(Analysis_1):
         return dict([(name, best_param(name)) for name in df_dict.keys()])
 
     def bestRows(self):
-        df = pd.read_csv(self.file, index_col=0)
+        df = pd.read_csv(self.error_file, index_col=0)
         best_rows = df.loc[lambda df: df["Error"] == 1]
-        best_rows.to_csv("\\".join([self.folder, "Error_Best.csv"]))
+        best_rows.to_csv("\\".join([self.folder(2), "Error_Best.csv"]))
         return best_rows
 

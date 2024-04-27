@@ -7,21 +7,22 @@ import os
 from WalkedGraphs import WalkedGraphs
 
 class Analysis_1:
-    def __init__(self, hyp_range_dict, k, n = None, graph_csv = "WalkedGraphs.csv"):
+    def __init__(self, hyp_range_dict, k, n = None, graph_file = "\\".join([os.getcwd(), "WalkedGraphs.csv"])):
         self.hyp_dict = hyp_range_dict
         self.hyp_names = ["p", "T", "eps", "n", "alpha", "beta", "gamma"]
         hyp_combos = product(*[hyp_range_dict[name] for name in self.hyp_names])
         self.hyp_dicts = [dict(zip(self.hyp_names, hyp_values)) for hyp_values in hyp_combos]
-        self.graphs = self.getGraphs(n, graph_csv)
+        self.graphs = self.getGraphs(n, graph_file)
         self.n = len(self.graphs)
         self.train_test_dict = self.get_train_test_dict(k=k)
+        self.folder = lambda i: "\\".join([os.getcwd(), "Analysis_{}".format(i)])
 
-    def getGraphs(self, n, graph_csv):
-        if graph_csv is not None:
-            return WalkedGraphs(n, graph_csv).graphs
+    def getGraphs(self, n, graph_file):
+        if graph_file is not None:
+            return WalkedGraphs(n, graph_file).graphs
         else:
-            WalkedGraphs(n, graph_csv).getCSV()
-            return WalkedGraphs(n, csv="WalkedGraphs.csv").graphs
+            WalkedGraphs(n, graph_file).getCSV()
+            return WalkedGraphs(n).graphs
 
     def partition(self, k):
         (q, r) = (self.n // k, self.n % k)
@@ -60,7 +61,7 @@ class Analysis_1:
             error = self.hyp_error(hyp_dict)
             row = hyps + [error]
             df = pd.DataFrame.from_dict(data = {i: row}, orient = "index", columns = self.hyp_names + ["Error"])
-            df.to_csv("\\".join([os.getcwd(), "Error", "Error_{}.csv".format(i)]))
+            df.to_csv("\\".join([self.folder(1), "Error_{}.csv".format(i)]))
             return pd.DataFrame.from_dict(data = {i: row}, orient = "index", columns = self.hyp_names + ["Error"])
 
         start_time = time.time()
@@ -70,10 +71,10 @@ class Analysis_1:
             i = prev_df.index[-1] + 1
             new_row = error_row(i)
             df = pd.concat([prev_df, new_row], axis=0)
-            df.to_csv("\\".join([os.getcwd(), "Error", "Error.csv"]))
+            df.to_csv("\\".join([self.folder(1), "Error.csv"]))
         else:
             df = error_row(0)
-            df.to_csv("\\".join([os.getcwd(), "Error", "Error.csv"]))
+            df.to_csv("\\".join([self.folder(1), "Error.csv"]))
 
         print("Time Elapsed: {} Minutes".format((time.time() - start_time) / 60))
         return df

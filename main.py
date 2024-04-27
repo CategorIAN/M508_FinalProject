@@ -13,10 +13,14 @@ def f(i):
     if i == 1:
         A = Analysis_2()
         print(A.plots())
+        print(A.bestRows())
     if i == 2:
         A = Analysis_3()
         A.getG_S_CSV()
+    if i == 3:
+        A = Analysis_3()
+        A.drawGraphs()
 
 if __name__ == '__main__':
-    f(1)
+    f(3)
 
