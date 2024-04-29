@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import os
 
 class Analysis_2(Analysis_1):
-    def __init__(self):
+    def __init__(self, graph_file = None, graphDist = None, n = None):
         hyp_range_dict = {"p": [3, 4], "T": [2, 1], "eps": [0.01, 0.05], "n": [2, 3],
                           "alpha": [0.01, 0.1], "beta": [5, 10], "gamma": [0.9, 1]}
-        graph_file = "\\".join([os.getcwd(), "Analysis_1", "OurWalkedGraphs.csv"])
-        super().__init__(hyp_range_dict, 4, graph_file = graph_file)
+        graph_file = "\\".join([os.getcwd(), "Analysis_1", "OurWalkedGraphs.csv"]) if graph_file is None else graph_file
+        super().__init__(hyp_range_dict, 4, graph_file = graph_file, graphDist=graphDist, n = n)
         self.error_file = "\\".join([self.folder(1), "Error.csv"])
 
     def groupedErrorDf(self):

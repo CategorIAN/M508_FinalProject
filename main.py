@@ -2,7 +2,6 @@ from TSP_RL import TSP_RL
 from RegularPolygon import RandomRegularPolygon, RegularPolygon
 from Analysis_1 import Analysis_1
 from TSP_HK import TSP_HK
-from RandomEuclideanGraph import RandomEuclideanGraph
 from WalkedGraphs import WalkedGraphs
 import os
 import pandas as pd

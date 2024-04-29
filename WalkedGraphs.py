@@ -1,33 +1,9 @@
-from RandomEuclideanGraph import RandomEuclideanGraph
 from EuclideanGraph import EuclideanGraph
 import pandas as pd
-import os
 
 class WalkedGraphs:
-    def __init__(self, n = None, file = "\\".join([os.getcwd(), "WalkedGraphs.csv"])):
-        if file is not None:
-            self.graphs = self.getGraphsFromCSV(file)
-            self.n = len(self.graphs)
-        else:
-            self.n = n
-            self.graphs = self.createGraphs()
-
-    def createGraphs(self):
-        def walkedGraph():
-            G = RandomEuclideanGraph()
-            return G.thisWithShortestCycle()
-        return [walkedGraph() for i in range(self.n)]
-
-    def getCSV(self, file = "\\".join([os.getcwd(), "WalkedGraphs.csv"])):
-        def graphDF(i):
-            G = self.graphs[i]
-            ordered_points = [G.points[j] for j in G.shortest_cycle]
-            d = G.distance
-            xs, ys = tuple(zip(*ordered_points))
-            return pd.DataFrame(data = {"Graph": G.n * [i], "x": xs, "y": ys, "d": G.n * [d]})
-        df = pd.concat([graphDF(i) for i in range(self.n)], axis=0).reset_index(drop=True)
-        df.to_csv(file)
-        return df
+    def __init__(self, file, graphDist = None, n = None):
+        self.graphs = self.createGraphs(graphDist, n) if file is None else self.getGraphsFromCSV(file)
 
     def getGraphsFromCSV(self, file):
         df = pd.read_csv(file, index_col=0)
@@ -39,6 +15,31 @@ class WalkedGraphs:
             d = graph_df["d"].iloc[0]
             return EuclideanGraph(points=ordered_points, shortest_cycle=S, distance=d)
         return [graph(i) for i in range(m)]
+
+    def createGraphs(self, graphDist, n):
+        return [graphDist.randomGraph().thisWithShortestCycle() for i in range(n)]
+
+    def toCSV(self, graphs, file):
+        def graphDF(i):
+            G = graphs[i]
+            ordered_points = [G.points[j] for j in G.shortest_cycle]
+            d = G.distance
+            xs, ys = tuple(zip(*ordered_points))
+            return pd.DataFrame(data = {"Graph": G.n * [i], "x": xs, "y": ys, "d(G)": G.n * [d]})
+        df = pd.concat([graphDF(i) for i in range(len(graphs))], axis=0).reset_index(drop=True)
+        df.to_csv(file)
+        return df
+
+    def getGraphs(self, file, graphDist, n):
+        try:
+            return self.getGraphsFromCSV(file)
+        except:
+            graphs = self.createGraphs(graphDist, n)
+            self.toCSV(graphs, file)
+            return self.getGraphsFromCSV(file)
+
+
+
 
 
 

@@ -5,10 +5,10 @@ from EuclideanGraph import EuclideanGraph
 import matplotlib.pyplot as plt
 
 class Analysis_3 (Analysis_2):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, graph_file = None, graphDist = None, n = None):
+        super().__init__(graph_file, graphDist, n)
         self.best_hyp_dict = {"p": 4, "T": 2, "eps": 0.01, "n": 3, "alpha": 0.1, "beta": 5, "gamma": 0.9}
-        self.hyp_params = [self.best_hyp_dict[k] for k in self.hyp_names]
+        self.best_hyp_params = [self.best_hyp_dict[k] for k in self.hyp_names]
 
     def inversePerm(self, S):
         index = list(range(len(S)))
@@ -31,7 +31,7 @@ class Analysis_3 (Analysis_2):
     def getG_S_CSV(self, graphs = None, output_file = None):
         output_file = "\\".join([self.folder(3), "WalkedGraphsWithApproxS.csv"]) if output_file is None else output_file
         graphs = self.graphs if graphs is None else graphs
-        tsp = TSP_RL(*self.hyp_params)
+        tsp = TSP_RL(*self.best_hyp_params)
         G_S_list, Theta = tsp.QLearning(graphs)
         graphDF_func = self.graphDF(G_S_list)
         df = pd.concat([graphDF_func(i) for i in range(len(G_S_list))], axis=0).reset_index(drop=True)

@@ -7,22 +7,16 @@ import os
 from WalkedGraphs import WalkedGraphs
 
 class Analysis_1:
-    def __init__(self, hyp_range_dict, k, n = None, graph_file = "\\".join([os.getcwd(), "WalkedGraphs.csv"])):
-        self.hyp_dict = hyp_range_dict
+    def __init__(self, hyp_range_dict, k, graph_file = None, graphDist = None, n = None):
+        self.folder = lambda i: "\\".join([os.getcwd(), "Analysis_{}".format(i)])
+        graph_file = "\\".join([self.folder(1), "WalkedGraphs.csv"]) if graph_file is None else graph_file
+        self.hyp_range_dict = hyp_range_dict
         self.hyp_names = ["p", "T", "eps", "n", "alpha", "beta", "gamma"]
         hyp_combos = product(*[hyp_range_dict[name] for name in self.hyp_names])
         self.hyp_dicts = [dict(zip(self.hyp_names, hyp_values)) for hyp_values in hyp_combos]
-        self.graphs = self.getGraphs(n, graph_file)
+        self.graphs = WalkedGraphs(graph_file, graphDist, n).graphs
         self.n = len(self.graphs)
         self.train_test_dict = self.get_train_test_dict(k=k)
-        self.folder = lambda i: "\\".join([os.getcwd(), "Analysis_{}".format(i)])
-
-    def getGraphs(self, n, graph_file):
-        if graph_file is not None:
-            return WalkedGraphs(n, graph_file).graphs
-        else:
-            WalkedGraphs(n, graph_file).getCSV()
-            return WalkedGraphs(n).graphs
 
     def partition(self, k):
         (q, r) = (self.n // k, self.n % k)
