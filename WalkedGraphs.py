@@ -3,7 +3,7 @@ import pandas as pd
 
 class WalkedGraphs:
     def __init__(self, file, graphDist = None, n = None):
-        self.graphs = self.createGraphs(graphDist, n) if file is None else self.getGraphsFromCSV(file)
+        self.graphs = self.getGraphs(file, graphDist, n)
 
     def getGraphsFromCSV(self, file):
         df = pd.read_csv(file, index_col=0)
@@ -12,7 +12,7 @@ class WalkedGraphs:
             graph_df = df.loc[lambda df: df["Graph"] == i]
             ordered_points = list(zip(list(graph_df["x"]), list(graph_df["y"])))
             S = list(range(len(ordered_points)))
-            d = graph_df["d"].iloc[0]
+            d = graph_df["d(G)"].iloc[0]
             return EuclideanGraph(points=ordered_points, shortest_cycle=S, distance=d)
         return [graph(i) for i in range(m)]
 
@@ -33,7 +33,7 @@ class WalkedGraphs:
     def getGraphs(self, file, graphDist, n):
         try:
             return self.getGraphsFromCSV(file)
-        except:
+        except FileNotFoundError:
             graphs = self.createGraphs(graphDist, n)
             self.toCSV(graphs, file)
             return self.getGraphsFromCSV(file)

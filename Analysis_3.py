@@ -3,6 +3,7 @@ from TSP_RL import TSP_RL
 import pandas as pd
 from EuclideanGraph import EuclideanGraph
 import matplotlib.pyplot as plt
+from WalkedGraphs import WalkedGraphs
 
 class Analysis_3 (Analysis_2):
     def __init__(self, graph_file = None, graphDist = None, n = None):
@@ -14,6 +15,11 @@ class Analysis_3 (Analysis_2):
         index = list(range(len(S)))
         inverseDict = dict(list(zip(S, index)))
         return [inverseDict[i] for i in index]
+
+    def newFile(self, file, note):
+        file_path = file.split("\\")
+        csv_file = file_path[-1].strip(".csv")
+        return "\\".join(file_path[:-1] + ["{} ({}).csv".format(csv_file, note)])
 
     def graphDF(self, G_S_list):
         def f(i):
@@ -28,18 +34,17 @@ class Analysis_3 (Analysis_2):
                 "actualDist": G.n * [actualDist], "approxDist": G.n * [approxDist], "approxRatio": G.n * [approxRatio]})
         return f
 
-    def getG_S_CSV(self, graphs = None, output_file = None):
-        output_file = "\\".join([self.folder(3), "WalkedGraphsWithApproxS.csv"]) if output_file is None else output_file
-        graphs = self.graphs if graphs is None else graphs
+    def toCSV(self, graph_file, graphDist = None, n = None):
+        graphs = WalkedGraphs(graph_file, graphDist, n).graphs
         tsp = TSP_RL(*self.best_hyp_params)
-        G_S_list, Theta = tsp.QLearning(graphs)
+        G_S_list, _ = tsp.QLearning(graphs)
         graphDF_func = self.graphDF(G_S_list)
         df = pd.concat([graphDF_func(i) for i in range(len(G_S_list))], axis=0).reset_index(drop=True)
+        output_file = self.newFile(graph_file, "approxS")
         df.to_csv(output_file)
         return df
 
-    def getG_S_r_List(self, file):
-        file = "\\".join([self.folder(3), "WalkedGraphsWithApproxS.csv"]) if file is None else file
+    def getG_S_rFromCSV(self, file):
         df = pd.read_csv(file, index_col=0)
         m = len(df["Graph"].unique())
         def G_S_r(i):
@@ -52,8 +57,15 @@ class Analysis_3 (Analysis_2):
             return EuclideanGraph(points=ordered_points, shortest_cycle=S_true, distance=d_true), S_approx, approx_ratio
         return [G_S_r(i) for i in range(m)]
 
-    def drawGraphs(self, file = None):
-        G_S_r_list = self.getG_S_r_List(file)
+    def getG_S_r(self, graph_file, graphDist, n):
+        try:
+            return self.getG_S_rFromCSV(self.newFile(graph_file, "approxS"))
+        except FileNotFoundError:
+            self.toCSV(graph_file, graphDist, n)
+            return self.getG_S_rFromCSV(self.newFile(graph_file, "approxS"))
+
+    def drawGraphs(self, graph_file, graphDist, n):
+        G_S_r_list = self.getG_S_r(graph_file, graphDist, n)
 
         def graph_plot(i):
             G, S, r = G_S_r_list[i]
