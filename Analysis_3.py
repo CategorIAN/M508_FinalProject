@@ -16,10 +16,10 @@ class Analysis_3 (Analysis_2):
         inverseDict = dict(list(zip(S, index)))
         return [inverseDict[i] for i in index]
 
-    def newFile(self, file, note):
+    def newFile(self, file, note, ext = ".csv"):
         file_path = file.split("\\")
         csv_file = file_path[-1].strip(".csv")
-        return "\\".join(file_path[:-1] + ["{} ({}).csv".format(csv_file, note)])
+        return "\\".join(file_path[:-1] + ["{} ({})".format(csv_file, note) + ext])
 
     def graphDF(self, G_S_list):
         def f(i):
@@ -78,13 +78,15 @@ class Analysis_3 (Analysis_2):
             plt.plot(closed(x_approx), closed(y_approx), "-", label="Approximated")
             plt.plot(closed(x_true), closed(y_true), "-", label = "Optimal")
             plt.legend()
+            plt.savefig(self.newFile(graph_file, "Graph {} Plot".format(i), ext=".png"))
             plt.show()
         [graph_plot(i) for i in range(len(G_S_r_list))]
         episodes, ratios = tuple(zip(*[(i, G_S_r_list[i][2]) for i in range(len(G_S_r_list))]))
         plt.suptitle("Approx Ratio vs. Episode")
         plt.xlabel("Episode")
         plt.ylabel("Approx Ratio")
-        plt.plot(episodes, ratios, "o")
+        plt.bar(episodes, ratios)
+        plt.savefig(self.newFile(graph_file, "Approx Ratio vs. Episode", ext=".png"))
         plt.show()
 
 
