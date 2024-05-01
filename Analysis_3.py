@@ -66,21 +66,27 @@ class Analysis_3 (Analysis_2):
 
     def drawGraphs(self, graph_file, graphDist, n):
         G_S_r_list = self.getG_S_r(graph_file, graphDist, n)
+        fig, axs = plt.subplots(1, n)
+        fig.suptitle("Learned Paths of Graphs over {} Episodes".format(n))
 
         def graph_plot(i):
             G, S, r = G_S_r_list[i]
+            ax = axs[i]
             ordered_points = G.points
             closed = lambda z: z + (z[0],)
             x_true, y_true = tuple(zip(*ordered_points))
-            plt.suptitle("Learned Path of Graph {} After Episode {} (Approx Ratio: {})".format(i, i, round(r, 2)))
-            plt.plot(x_true, y_true, "o")
+            ax.set_title("Learned Path after Episode {} (Approx Ratio: {})".format(i, round(r, 2)))
+            ax.plot(x_true, y_true, "o")
             x_approx, y_approx = tuple(zip(*[G.points[j] for j in S]))
-            plt.plot(closed(x_approx), closed(y_approx), "-", label="Approximated")
-            plt.plot(closed(x_true), closed(y_true), "-", label = "Optimal")
-            plt.legend()
-            plt.savefig(self.newFile(graph_file, "Graph {} Plot".format(i), ext=".png"))
-            plt.show()
+            ax.plot(closed(x_approx), closed(y_approx), "-", label="Approximated")
+            ax.plot(closed(x_true), closed(y_true), "-", label = "Optimal")
+            ax.legend()
+            #plt.savefig(self.newFile(graph_file, "Graph {} Plot".format(i), ext=".png"))
+            #plt.show()
         [graph_plot(i) for i in range(len(G_S_r_list))]
+        plt.savefig(self.newFile(graph_file, "Learned Paths", ext=".png"))
+        plt.show()
+        """
         episodes, ratios = tuple(zip(*[(i, G_S_r_list[i][2]) for i in range(len(G_S_r_list))]))
         plt.suptitle("Approx Ratio vs. Episode")
         plt.xlabel("Episode")
@@ -88,6 +94,7 @@ class Analysis_3 (Analysis_2):
         plt.bar(episodes, ratios)
         plt.savefig(self.newFile(graph_file, "Approx Ratio vs. Episode", ext=".png"))
         plt.show()
+        """
 
 
 
