@@ -67,7 +67,7 @@ class Analysis_3 (Analysis_2):
     def drawGraphs(self, graph_file, graphDist, n):
         G_S_r_list = self.getG_S_r(graph_file, graphDist, n)
         fig, axs = plt.subplots(1, n)
-        fig.suptitle("Learned Paths of Graphs over {} Episodes".format(n))
+        #fig.suptitle("Learned Paths of Graphs over {} Episodes".format(n))
 
         def graph_plot(i):
             G, S, r = G_S_r_list[i]
@@ -75,7 +75,8 @@ class Analysis_3 (Analysis_2):
             ordered_points = G.points
             closed = lambda z: z + (z[0],)
             x_true, y_true = tuple(zip(*ordered_points))
-            ax.set_title("Learned Path after Episode {} (Approx Ratio: {})".format(i, round(r, 2)))
+            ax.set_title("Episode {}".format(i))
+            ax.set_xlabel("Approx Ratio: {}".format(round(r, 2)))
             ax.plot(x_true, y_true, "o")
             x_approx, y_approx = tuple(zip(*[G.points[j] for j in S]))
             ax.plot(closed(x_approx), closed(y_approx), "-", label="Approximated")
