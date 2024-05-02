@@ -48,8 +48,10 @@ class TSP_HK:
         :param G: graph
         :return: final dynamic dictionary of subproblems built from the bottom up
         '''
+        print("Creating Q Dict")
         neighbors = [v for v in G.vertices if v != 0]
         def createLevel(Q_dict, i):
+            print("Creating Level {}".format(i))
             if i == G.n:
                 return Q_dict
             else:
@@ -73,6 +75,7 @@ class TSP_HK:
         :param Q_dict: dynamic dictionary that contains the subproblems
         :return: permutation of vertices of G that give the shortest Hamiltonian cycle
         '''
+        print("Calculating Walk From Q")
         def updated_S(i, S):
             if i == G.n:
                 return S

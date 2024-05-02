@@ -75,7 +75,7 @@ class Analysis_3 (Analysis_2):
             ordered_points = G.points
             closed = lambda z: z + (z[0],)
             x_true, y_true = tuple(zip(*ordered_points))
-            ax.set_title("Episode {}".format(i))
+            ax.set_title("Episode {}".format(i + 1))
             ax.set_xlabel("Approx Ratio: {}".format(round(r, 2)))
             ax.plot(x_true, y_true, "o")
             x_approx, y_approx = tuple(zip(*[G.points[j] for j in S]))
