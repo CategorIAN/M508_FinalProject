@@ -6,6 +6,8 @@ class EuclideanGraph(CompleteGraph):
     def __init__(self, points, shortest_cycle = None, distance = None):
         '''
         :param points: the two-dimensional points to use for the graph
+        :param shortest_cycle: an optimal permutation of vertices for the TSP
+        :param distance: the minimal walk distance for the TSP
         '''
         self.points = points
         self.shortest_cycle = shortest_cycle
@@ -23,6 +25,9 @@ class EuclideanGraph(CompleteGraph):
         return "Graph{}".format(set(self.points))
 
     def thisWithShortestCycle(self):
+        '''
+        :return: the same graph with calculated best permutation and walk distance for the TSP
+        '''
         S = TSP_HK().calculateWalk(self)
         d = self.walkDistance(self.closeWalk(S))
         return EuclideanGraph(self.points, shortest_cycle = S, distance = d)

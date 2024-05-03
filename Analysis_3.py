@@ -7,21 +7,40 @@ from WalkedGraphs import WalkedGraphs
 
 class Analysis_3 (Analysis_2):
     def __init__(self, graph_file = None, graphDist = None, n = None):
+        '''
+        :param graph_file: the file to read from or to write to for the walked graphs
+        :param graphDist: the graph distribution used to generate graphs (if the file is not already created)
+        :param n: the number of graphs to generate (if the file is not already created)
+        '''
         super().__init__(graph_file, graphDist, n)
         self.best_hyp_dict = {"p": 4, "T": 2, "eps": 0.01, "n": 3, "alpha": 0.1, "beta": 5, "gamma": 0.9}
         self.best_hyp_params = [self.best_hyp_dict[k] for k in self.hyp_names]
 
     def inversePerm(self, S):
+        '''
+        :param S: permutation
+        :return: the inverse permutation of S
+        '''
         index = list(range(len(S)))
         inverseDict = dict(list(zip(S, index)))
         return [inverseDict[i] for i in index]
 
     def newFile(self, file, note, ext = ".csv"):
+        '''
+        :param file: file to create a new file from
+        :param note: additional note used to name new file
+        :param ext: extension of file
+        :return: new file
+        '''
         file_path = file.split("\\")
         csv_file = file_path[-1].strip(".csv")
         return "\\".join(file_path[:-1] + ["{} ({})".format(csv_file, note) + ext])
 
     def graphDF(self, G_S_list):
+        '''
+        :param G_S_list: list of (G, S) where G is a graph and S is permutation to approximate TSP
+        :return: dataframe that stores the graph information as well as S and walk distance that approximate TSP
+        '''
         def f(i):
             G, S = G_S_list[i]
             ordered_points = [G.points[j] for j in G.shortest_cycle]
@@ -35,6 +54,12 @@ class Analysis_3 (Analysis_2):
         return f
 
     def toCSV(self, graph_file, graphDist = None, n = None):
+        '''
+        :param graph_file: the file to read from or to write to for the walked graphs
+        :param graphDist: the graph distribution used to generate graphs (if the file is not already created)
+        :param n: the number of graphs to generate (if the file is not already created)
+        :return: dataframe of graphs with approximated best S and walk distance (side effect: stores this in a new file)
+        '''
         graphs = WalkedGraphs(graph_file, graphDist, n).graphs
         tsp = TSP_RL(*self.best_hyp_params)
         G_S_list, _ = tsp.QLearning(graphs)
@@ -45,6 +70,10 @@ class Analysis_3 (Analysis_2):
         return df
 
     def getG_S_rFromCSV(self, file):
+        '''
+        :param file: file to get (G, S, r) list from
+        :return: (G, S, r) list where G is graph, S is calculated permutation, and r is approximation ratio from S
+        '''
         df = pd.read_csv(file, index_col=0)
         m = len(df["Graph"].unique())
         def G_S_r(i):
@@ -58,6 +87,12 @@ class Analysis_3 (Analysis_2):
         return [G_S_r(i) for i in range(m)]
 
     def getG_S_r(self, graph_file, graphDist, n):
+        '''
+        :param graph_file: the file to read from or to write to for the walked graphs
+        :param graphDist: the graph distribution used to generate graphs (if the file is not already created)
+        :param n: the number of graphs to generate (if the file is not already created)
+        :return: (G, S, r) list where G is graph, S is calculated permutation, and r is approximation ratio from S
+        '''
         try:
             return self.getG_S_rFromCSV(self.newFile(graph_file, "approxS"))
         except FileNotFoundError:
@@ -65,6 +100,12 @@ class Analysis_3 (Analysis_2):
             return self.getG_S_rFromCSV(self.newFile(graph_file, "approxS"))
 
     def drawGraphs(self, graph_file, graphDist, n):
+        '''
+        :param graph_file: the file to read from or to write to for the walked graphs
+        :param graphDist: the graph distribution used to generate graphs (if the file is not already created)
+        :param n: the number of graphs to generate (if the file is not already created)
+        :return: None (side effect: saves and shows plots of graphs drawn with optimal path along with calculated path)
+        '''
         G_S_r_list = self.getG_S_r(graph_file, graphDist, n)
         fig, axs = plt.subplots(1, n)
         #fig.suptitle("Learned Paths of Graphs over {} Episodes".format(n))

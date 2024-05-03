@@ -407,9 +407,9 @@ class TSP_RL:
 
     def QLearning(self, Gs):
         '''
-        :param L: number of episodes to use
-        :return: (G_S_list, (Theta, M)) where G_S_list is a list of (G, S) for graph G and its corresponding
-                 permutation S to use and (Theta, M) are updated values from the Q learning
+        :param Gs: list of graphs to use
+        :return: (G_S_list, Theta) where G_S_list is a list of (G, S) for graph G and its corresponding
+                 permutation S to use and Theta is the final list of weights after Q Learning
         '''
         def appendEpisodeResults(results, G):
             G_S_list, (Theta, M) = results
@@ -420,6 +420,11 @@ class TSP_RL:
         return G_S_list_final, Theta_final
 
     def calculateWalk(self, Theta, G):
+        '''
+        :param Theta: object consisting of list of theta weights to use for Q function
+        :param G: graph
+        :return: permutation S of the graph's vertices to walk that approximates the TSP
+        '''
         appendS = lambda i, S: S if i == G.n else appendS(i + 1, self.updated_S(Theta, G)(S))
         return appendS(0, [])
 

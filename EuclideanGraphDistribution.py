@@ -11,6 +11,9 @@ class EuclideanGraphDistribution:
         self.pt_number_lim, self.xlim, self.ylim = pt_number_lim, xlim, ylim
 
     def randomGraph(self):
+        '''
+        :return: a random graph from the distribution
+        '''
         n = random.randint(*self.pt_number_lim)
         points = [(random.randint(*self.xlim), random.randint(*self.ylim)) for i in range(n)]
         return EuclideanGraph(points)
