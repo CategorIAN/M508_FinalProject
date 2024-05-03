@@ -2,6 +2,7 @@ from itertools import product
 import numpy as np
 from functools import reduce
 import random
+
 class CompleteGraph:
     def __init__(self, dist_matrix):
         '''
