@@ -128,15 +128,6 @@ class Analysis_3 (Analysis_2):
         [graph_plot(i) for i in range(len(G_S_r_list))]
         plt.savefig(self.newFile(graph_file, "Learned Paths", ext=".png"))
         plt.show()
-        """
-        episodes, ratios = tuple(zip(*[(i, G_S_r_list[i][2]) for i in range(len(G_S_r_list))]))
-        plt.suptitle("Approx Ratio vs. Episode")
-        plt.xlabel("Episode")
-        plt.ylabel("Approx Ratio")
-        plt.bar(episodes, ratios)
-        plt.savefig(self.newFile(graph_file, "Approx Ratio vs. Episode", ext=".png"))
-        plt.show()
-        """
 
 
 
